@@ -20,5 +20,6 @@
   "bugs": {
     "url": "https://github.com/AlabasterStone/sparx/issues"
   },
-  "homepage": "https://github.com/AlabasterStone/sparx#readme"
+  "homepage": "https://github.com/AlabasterStone/sparx#readme",
+  "type": "module"
 }
