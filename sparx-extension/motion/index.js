@@ -1,4 +1,4 @@
-const PIXI = require("pixi.js")
+//import * as PIXI from "pixi.js";
 
 //TODO: 编译时检查数据类型
 //SAE-json.md
@@ -84,13 +84,13 @@ function motion_turnleft(sprite, degree) {
     sprite.angle -= scratchAngleToCanvas(degree);
     return sprite;
 }
-
+/*
 var homo = PIXI.Sprite.from("test.svg");
 function print(s) {
     console.log(homo);
 }
 
-const { compile } = require("walt-compiler");
+import { compile } from "walt-compiler";
 const buffer = compile(`
 import { motion_print: PrintType } from 'env';
 
@@ -101,4 +101,19 @@ export function echo(): void {
 WebAssembly.instantiate(buffer, { env: { motion_print: print } }).then(result => result.instance.exports.echo());
 const create_sprite = (path) => {var new_sprite = PIXI.Sprite.from(path);};
 const move_sprite = (x, y) => new_sprite.position.set(x, y);
+*/
 
+import { compile } from "walt-compiler";
+function walt_log(str) {
+    console.log(str);
+}
+
+const buffer2 = compile(`
+import { walt_log: PrintType } from 'env';
+
+type PrintType = () => void;
+export function echo(): void {
+  walt_log("Hello, World Walt!");
+}`).buffer();
+
+WebAssembly.instantiate(buffer2, { env: { walt_log: walt_log } }).then(result => result.instance.exports.echo());
