@@ -1,0 +1,160 @@
+[
+    {
+        "opcode": "event_whenflagclicked",
+        "args": {
+            "fields": [],
+            "inputs": {}
+        }
+    },
+    {
+        "opcode": "control_repeat",
+        "args": {
+            "fields": [],
+            "inputs": {
+                "TIMES": 10,
+                "SUBSTACK": {
+                    "opcode": "motion_movesteps",
+                    "args": {
+                        "fields": [],
+                        "inputs": {
+                            "STEPS": 10
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "opcode": "event_broadcast",
+        "args": {
+            "fields": [],
+            "inputs": {
+                "BROADCAST_INPUT": "消息1"
+            }
+        }
+    },
+    {
+        "opcode": "data_setvariableto",
+        "args": {
+            "fields": [
+                {
+                    "VARIABLE": "test"
+                }
+            ],
+            "inputs": {
+                "VALUE": "0"
+            }
+        }
+    },
+    {
+        "opcode": "looks_say",
+        "args": {
+            "fields": [],
+            "inputs": {
+                "MESSAGE": "GV})V)]Ik~smmEuPb=B$"
+            }
+        }
+    },
+    {
+        "opcode": "data_setvariableto",
+        "args": {
+            "fields": [
+                {
+                    "VARIABLE": "test"
+                }
+            ],
+            "inputs": {
+                "VALUE": {
+                    "opcode": "operator_add",
+                    "args": {
+                        "fields": [],
+                        "inputs": {
+                            "NUM1": "GV})V)]Ik~smmEuPb=B$",
+                            "NUM2": 114514
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "opcode": "control_wait_until",
+        "args": {
+            "fields": [],
+            "inputs": {
+                "CONDITION": {
+                    "opcode": "operator_gt",
+                    "args": {
+                        "fields": [],
+                        "inputs": {
+                            "OPERAND1": "GV})V)]Ik~smmEuPb=B$",
+                            "OPERAND2": "50"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "opcode": "looks_goforwardbackwardlayers",
+        "args": {
+            "fields": [
+                {
+                    "FORWARD_BACKWARD": "forward"
+                }
+            ],
+            "inputs": {
+                "NUM": 1
+            }
+        }
+    },
+    {
+        "opcode": "data_deleteoflist",
+        "args": {
+            "fields": [
+                {
+                    "LIST": "test"
+                }
+            ],
+            "inputs": {
+                "INDEX": 2
+            }
+        }
+    },
+    {
+        "opcode": "motion_pointindirection",
+        "args": {
+            "fields": [],
+            "inputs": {
+                "DIRECTION": 90
+            }
+        }
+    },
+    {
+        "opcode": "sensing_askandwait",
+        "args": {
+            "fields": [],
+            "inputs": {
+                "QUESTION": {
+                    "opcode": "operator_join",
+                    "args": {
+                        "fields": [],
+                        "inputs": {
+                            "STRING1": "GV})V)]Ik~smmEuPb=B$",
+                            "STRING2": "香蕉"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "opcode": "event_broadcast",
+        "args": {
+            "fields": [],
+            "inputs": {
+                "BROADCAST_INPUT": "消息1"
+            }
+        }
+    }
+]

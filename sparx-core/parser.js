@@ -1,34 +1,35 @@
+/// MIT License
+/// Copyright (c) 2022-2023 Zhang Shuning
+///                         Sparx Project
+/// Code by AlabasterStone
+/// All Right Reserved.
+
+//引入测试数据
+/**************************************/
 import testData from "./test.js";
-
-
+import { testData2 } from "./test.js";
+/**************************************/
+//TODO: 1.解析变量和列表
+//      2.解析广播
+//      3.解析造型
+//      4.解析声音
+//      5.解析舞台上显示的变量和列表监视
+//      6.解析扩展
 
 /**
- * 
+ * 解析project.json文件
  * @param {Object} projectJson 
+ * @returns {Object} parseObject
  */
 export function parse(projectJson) {
-    var parseObject = {};
-    for (let target of projectJson["targets"]) {
-        if (target["isStage"]) {
-            parseObject["stage"] = {};
-            let blocks = target["blocks"];
-            for (let block of blocks.values()) {
-                if (block["parent"] === null) {
-                    let codeBlock = [];
-                    let currentBlock = block;
-                    while (currentBlock["next"] !== null) {
-                        let blockInputs = [];
-
-                        codeBlock.push({ opcode: currentBlock["opcode"], inputs: currentBlock["inputs"] });
-                        let currentBlock = block["next"];
-                    }
-                }
-            }
-        }
+    let parseObject = {};
+    for (target in projectJson.targets) {
+        let blocks = target.blocks;
+        findHatBlocks(blocks).forEach((key) => parseObject[target.name].blocks = generateBlocksCode(blocks, key));
+        //TODO: ...
     }
+    return parseObject;
 }
-
-var parseObject = {};
 
 /**
  * 遍历查找事件类积木
@@ -49,7 +50,7 @@ function findHatBlocks(blocks) {
 }
 
 /**
- * 
+ * 类型检查
  * @param {Number} typeCode 
  * @param {String} value 
  * @returns {Boolean} 类型是否正确
@@ -60,7 +61,7 @@ function typeCheck(typeCode, value) {
         case 1:
             return typeof value == "object" || typeof value == "string";
         case 2:
-            return typeof value == "string";
+            return typeof value == "string" || value === null;
         case 3:
             return typeof value == "string" || value[0] == 12 || value[0] == 13;
         case 4:
@@ -76,7 +77,7 @@ function typeCheck(typeCode, value) {
         case 9:
             return value.length == 7 && value[0] == "#";
         case 10:
-            return typeof value == "string";
+            return typeof value == "string" || typeof value == "number";
         case 11:
             return typeof value == "string";
         case 12:
@@ -87,7 +88,7 @@ function typeCheck(typeCode, value) {
 }
 
 /**
- * 
+ * 生成积木的输入对象
  * @param {Object} blocks 
  * @param {Object} inputs 
  * @returns {Object} 生成的输入对象
@@ -110,10 +111,10 @@ function genBlockInputs(blocks, inputs) {
                     genInputs[key] = Number(inputBlock[1]);
                 }
                 else if (inputBlock[0] == 12) {
-                    genInputs[key] = "var_" + inputBlock[1];
+                    genInputs[key] = inputBlock[2];
                 }
                 else if (inputBlock[0] == 13) {
-                    genInputs[key] = "list_" + inputBlock[1];
+                    genInputs[key] = inputBlock[2];
                 }
                 else {
                     genInputs[key] = inputBlock[1];
@@ -164,6 +165,7 @@ function generateBlocksCode(blocks, hatBlockKey) {
     return blockCode;
 }
 
+//单元测试
 function unitTests(func) {
     if (func == findHatBlocks) {
         console.log(func(testData.targets[0].blocks));
@@ -173,4 +175,4 @@ function unitTests(func) {
     }
 }
 
-console.log("%j", generateBlocksCode(testData.targets[0].blocks, ":LT)|s-fO0A7W!4;@dvQ"));
+console.log("%j", generateBlocksCode(testData2.targets[1].blocks, "{FrIh3E-rGz/0)J}Ay]~"));

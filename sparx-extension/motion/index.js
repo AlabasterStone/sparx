@@ -104,16 +104,17 @@ const move_sprite = (x, y) => new_sprite.position.set(x, y);
 */
 
 import { compile } from "walt-compiler";
-function walt_log(str) {
-    console.log(str);
+var memory = new WebAssembly.Memory({ initial: 1 });
+function walt_log(string) {
+    console.log(string);
 }
 
 const buffer2 = compile(`
 import { walt_log: PrintType } from 'env';
-
-type PrintType = () => void;
+const memory: Memory<{ initial: 1 }>;
+type PrintType = (i32[]) => void;
 export function echo(): void {
-  walt_log("Hello, World Walt!");
+  walt_log("helloworld");
 }`).buffer();
 
 WebAssembly.instantiate(buffer2, { env: { walt_log: walt_log } }).then(result => result.instance.exports.echo());
