@@ -16,6 +16,7 @@ import { testData2 } from "./test.js";
 //      5.解析舞台上显示的变量和列表监视
 //      6.解析扩展
 
+
 /**
  * 解析project.json文件
  * @param {Object} projectJson 
@@ -23,11 +24,77 @@ import { testData2 } from "./test.js";
  */
 export function parse(projectJson) {
     let parseObject = {};
-    for (target in projectJson.targets) {
+    let stageObject = {
+        "isStage": true,
+        "variables": {},
+        "lists": {},
+        "broadcasts": {},
+        "blocks": {},
+        "comments": {},
+        "currentCostume": 0,
+        "costumes": [],
+        "sounds": [],
+        "volume": 100,
+        "layerOrder": 0,
+        "tempo": 60,
+        "videoTransparency": 50,
+        "videoState": "off",
+        "textToSpeechLanguage": null
+    };
+    let spriteObject = {
+        "isStage": false,
+        "variables": {},
+        "lists": {},
+        "broadcasts": {},
+        "blocks": {},
+        "comments": {},
+        "currentCostume": 0,
+        "costumes": [],
+        "sounds": [],
+        "volume": 100,
+        "layerOrder": 1,
+        "visible": true,
+        "x": 38,
+        "y": 46,
+        "size": 100,
+        "direction": 90,
+        "rotationStyle": "all around"
+    };
+    for (let target of projectJson.targets) {
+        let parseTarget = parseObject[target.name];
+        if (target.isStage) {
+            parseTarget = stageObject;
+            parseTarget.tempo = target.tempo;
+            parseTarget.videoTransparency = target.videoTransparency;
+            parseTarget.videoState = target.videoState;
+            parseTarget.textToSpeechLanguage = target.textToSpeechLanguage;
+        }
+        else {
+            parseTarget = spriteObject;
+            parseTarget.visible = target.visible;
+            parseTarget.x = target.x;
+            parseTarget.y = target.y;
+            parseTarget.size = target.size;
+            parseTarget.direction = target.direction;
+            parseTarget.rotationStyle = target.rotationStyle;
+        }
+        //生成代码
         let blocks = target.blocks;
-        findHatBlocks(blocks).forEach((key) => parseObject[target.name].blocks = generateBlocksCode(blocks, key));
-        //TODO: ...
+        findHatBlocks(blocks).forEach((key) => parseTarget.blocks = generateBlocksCode(blocks, key));
+        //生成变量和列表
+        parseTarget.variables = target.variables;
+        parseTarget.lists = target.lists;
+        parseTarget.isStage = target.isStage;
+        parseTarget.currentCostume = target.currentCostume;
+        parseTarget.broadcasts = target.broadcasts;
+        parseTarget.costumes = target.costumes;
+        parseTarget.sounds = target.sounds;
+        parseTarget.volume = target.volume;
+        parseTarget.layerOrder = target.layerOrder;
+        //赋值回去
+        parseObject[target.name] = parseTarget;
     }
+    parseObject.monitors = projectJson.monitors;
     return parseObject;
 }
 
@@ -175,4 +242,7 @@ function unitTests(func) {
     }
 }
 
-console.log("%j", generateBlocksCode(testData2.targets[1].blocks, "{FrIh3E-rGz/0)J}Ay]~"));
+export default parse;
+
+//console.log("%j", generateBlocksCode(testData2.targets[1].blocks, "{FrIh3E-rGz/0)J}Ay]~"));
+console.log("%j", parse(testData2));
