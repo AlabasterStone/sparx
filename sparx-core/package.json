@@ -21,5 +21,8 @@
     "url": "https://github.com/AlabasterStone/sparx/issues"
   },
   "homepage": "https://github.com/AlabasterStone/sparx#readme",
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "walt-compiler": "^0.21.0"
+  }
 }

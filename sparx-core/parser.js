@@ -22,7 +22,7 @@ import { testData2 } from "./test.js";
  * @param {Object} projectJson 
  * @returns {Object} parseObject
  */
-export function parse(projectJson) {
+export default function parse(projectJson) {
     let parseObject = {};
     let stageObject = {
         "isStage": true,
@@ -242,7 +242,6 @@ function unitTests(func) {
     }
 }
 
-export default parse;
-
+/*测试一下啊啊啊*/
 //console.log("%j", generateBlocksCode(testData2.targets[1].blocks, "{FrIh3E-rGz/0)J}Ay]~"));
 console.log("%j", parse(testData2));
