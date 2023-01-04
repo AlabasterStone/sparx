@@ -23,6 +23,7 @@ import { testData2 } from "./test.js";
  * @returns {Object} parseObject
  */
 export default function parse(projectJson) {
+    global.projetJson = projectJson;
     let parseObject = {};
     let stageObject = {
         "isStage": true,
@@ -63,6 +64,7 @@ export default function parse(projectJson) {
     for (let target of projectJson.targets) {
         let parseTarget = parseObject[target.name];
         if (target.isStage) {
+            var stageTarget = target;
             parseTarget = stageObject;
             parseTarget.tempo = target.tempo;
             parseTarget.videoTransparency = target.videoTransparency;
@@ -80,8 +82,8 @@ export default function parse(projectJson) {
         }
         //生成代码
         let blocks = target.blocks;
-        findHatBlocks(blocks).forEach((key) => parseTarget.blocks = generateBlocksCode(blocks, key));
-        //生成变量和列表
+        findHatBlocks(blocks).forEach((key) => parseTarget.blocks = generateBlocksCode(stageTarget, target, blocks, key));
+        //生成变量和列表 我在这看到删掉
         parseTarget.variables = target.variables;
         parseTarget.lists = target.lists;
         parseTarget.isStage = target.isStage;
@@ -95,6 +97,7 @@ export default function parse(projectJson) {
         parseObject[target.name] = parseTarget;
     }
     parseObject.monitors = projectJson.monitors;
+    parseObject.extensions = projectJson.extensions;
     return parseObject;
 }
 
@@ -156,32 +159,44 @@ function typeCheck(typeCode, value) {
 
 /**
  * 生成积木的输入对象
+ * @param {Object} stageTarget
+ * @param {Object} spriteTarget
  * @param {Object} blocks 
  * @param {Object} inputs 
  * @returns {Object} 生成的输入对象
  */
-function genBlockInputs(blocks, inputs) {
+function genBlockInputs(stageTarget, spriteTarget, blocks, inputs) {
     let genInputs = {};
     for (let key of Object.keys(inputs)) {
         let currentInput = inputs[key];
         if (typeCheck(currentInput[0], currentInput[1])) {
             if (typeof currentInput[1] == "string") {
-                genInputs[key] = parseBlock(blocks, currentInput[1]);
+                genInputs[key] = parseBlock(stageTarget, spriteTarget, blocks, currentInput[1]);
                 continue;
             }
             let inputBlock = currentInput[1];
             if (typeCheck(inputBlock[0], inputBlock[1])) {
                 if (inputBlock[0] == 2 || inputBlock[0] == 3) {
-                    genInputs[key] = parseBlock(blocks, inputBlock[1]);
+                    genInputs[key] = parseBlock(stageTarget, spriteTarget, blocks, inputBlock[1]);
                 }
                 else if (inputBlock[0] >= 4 && inputBlock[0] <= 8) {
                     genInputs[key] = Number(inputBlock[1]);
                 }
                 else if (inputBlock[0] == 12) {
-                    genInputs[key] = inputBlock[2];
+                    if (stageTarget.variables.hasOwnProperty(inputBlock[2])) {
+                        genInputs[key] = ["var_" + stageTarget.variables[inputBlock[2]][0], stageTarget.variables[inputBlock[2]][1]];
+                    }
+                    else {
+                        genInputs[key] = ["list_" + spriteTarget.variables[inputBlock[2]][0], spriteTarget.variables[inputBlock[2]][1]];
+                    }
                 }
                 else if (inputBlock[0] == 13) {
-                    genInputs[key] = inputBlock[2];
+                    if (stageTarget.lists.hasOwnProperty(inputBlock[2])) {
+                        genInputs[key] = stageTarget.lists[inputBlock[2]];
+                    }
+                    else {
+                        genInputs[key] = spriteTarget.lists[inputBlock[2]];
+                    }
                 }
                 else {
                     genInputs[key] = inputBlock[1];
@@ -202,31 +217,35 @@ function genBlockInputs(blocks, inputs) {
 
 /**
  * 解析积木
+ * @param {Object} stageTarget
+ * @param {Object} spriteTarget
  * @param {Object} blocks
  * @param {String} blockKey
  * @returns {Object} blockCode
  */
-function parseBlock(blocks, blockKey) {
+function parseBlock(stageTarget, spriteTarget, blocks, blockKey) {
     let block = blocks[blockKey];
     let blockFields = block["fields"];
     let fields = [];
     Object.keys(blockFields).forEach((key) => fields.push({ [key]: blockFields[key][0] }));
     let blockInputs = block["inputs"];
-    let blockArgs = { fields: fields, inputs: genBlockInputs(blocks, blockInputs) };
+    let blockArgs = { fields: fields, inputs: genBlockInputs(stageTarget, spriteTarget, blocks, blockInputs) };
     return { opcode: block["opcode"], args: blockArgs };
 }
 
 /**
  * 生成从事件类积木链接的积木对象
+ * @param {Object} stageTarget
+ * @param {Object} spriteTarget
  * @param {Object} blocks
  * @param {String} hatBlockKey 
  * @returns {Array} blocksCode
  */
-function generateBlocksCode(blocks, hatBlockKey) {
+function generateBlocksCode(stageTarget, spriteTarget, blocks, hatBlockKey) {
     let blockCode = [];
     let currentBlockKey = hatBlockKey;
     while (blocks[currentBlockKey]["next"] !== null) {
-        blockCode.push(parseBlock(blocks, currentBlockKey));
+        blockCode.push(parseBlock(stageTarget, spriteTarget, blocks, currentBlockKey));
         currentBlockKey = blocks[currentBlockKey]["next"];
     }
     return blockCode;

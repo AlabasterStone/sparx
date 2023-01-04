@@ -7,9 +7,16 @@
 //Just a template, working in progress, plz waiting for it done.
 
 import { compile } from "walt-compiler";
+import { jsCode } from "./code";
+
+var genCode = "";
+
+function generateImports() {
+    genCode += jsCode.IMPORT_EVENT;
+}
 
 export function generateJSCode(parseObject) {
-
+    generateImports();
 }
 
 export function compileWASMHotspot(blockObject) {
