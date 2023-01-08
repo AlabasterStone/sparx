@@ -11,11 +11,13 @@ import { jsCode } from "./code";
 
 var genCode = "";
 
-function generateImports() {
+function genImports() {
     genCode += jsCode.IMPORT_EVENT;
 }
 
-export function generateJSCode(parseObject) {
+function genInitCode()
+
+export function genJSCode(parseObject) {
     generateImports();
 }
 
@@ -27,10 +29,10 @@ function generateSpriteCode(spriteObject) {
 
 }
 
-function generateStageCode(stageObject) {
+function genStageCode(stageObject) {
 
 }
 
-function generateWASMCode(blockObject) {
+function genWaltCode(blockObject) {
 
 }
