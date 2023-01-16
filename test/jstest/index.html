@@ -1,2 +1,22 @@
-<body></body>
-<script src="./index.bundle.js"></script>
+<body>
+    <canvas id="scratch-stage" width="10" height="10"></canvas>
+    <script src="./dist/web/scratch-render.js">
+        const canvas = document.getElementById("scratch-stage");
+        const drawStep = function () {
+            renderer.draw();
+            // renderer.getBounds(drawableID2);
+            // renderer.isTouchingColor(drawableID2, [255,255,255]);
+            requestAnimationFrame(drawStep);
+        };
+        var renderer = new window.RenderWebGLLocal(canvas);
+        renderer.setLayerGroupOrdering(['group1']);
+        var sprite1 = renderer.createDrawable('group1');
+        var img = new Image();
+        img.src = "./794c78eb87530ed31644b9c2caeb226d.png";
+        img.onload = function () {
+            var costume1 = renderer.createBitmapSkin(img, 2, [97, 126]);
+            renderer.updateDrawableSkinId(sprite1, costume1);
+        };
+        drawStep();
+    </script>
+</body>

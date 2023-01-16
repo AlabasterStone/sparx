@@ -1,7 +1,4 @@
-//import * as PIXI from "pixi.js";
-
-//TODO: 编译时检查数据类型
-//SAE-json.md
+var PIXI = require("pixi.js");
 
 /**
  * @description 转换scratch到canvas坐标系
@@ -10,8 +7,8 @@
  * @returns {Object}
  */
 function scratchPosToCanvas(x, y) {
-    let canvas_x = window.innerWidth + x;
-    let canvas_y = window.innerHeight + y;
+    let canvas_x = 480 + x*2;
+    let canvas_y = 360 + y*2;
     return { x: canvas_x, y: canvas_y };
 }
 
@@ -22,8 +19,8 @@ function scratchPosToCanvas(x, y) {
  * @returns {Object}
  */
 function canvasPosToScratch(x, y) {
-    let scratch_x = x - window.innerHeight;
-    let scratch_y = y - window.innerHeight;
+    let scratch_x = x - 480;
+    let scratch_y = y - 360;
     return { x: scratch_x, y: scratch_y };
 }
 
@@ -70,7 +67,7 @@ function motion_movesteps(sprite, steps) {
  * @returns {PIXI.Sprite}
  */
 function motion_turnright(sprite, degree) {
-    sprite.angle += scratchAngleToCanvas(degree);
+    sprite.angle += degree;
     return sprite;
 }
 
@@ -81,9 +78,18 @@ function motion_turnright(sprite, degree) {
  * @returns {PIXI.Sprite}
  */
 function motion_turnleft(sprite, degree) {
-    sprite.angle -= scratchAngleToCanvas(degree);
+    sprite.angle -= degree;
     return sprite;
 }
+
+exports.scratchAngleToCanvas = scratchAngleToCanvas;
+exports.scratchPosToCanvas = scratchPosToCanvas;
+exports.canvasAngleToScratch = canvasAngleToScratch;
+exports.canvasPosToScratch = canvasPosToScratch;
+exports.motion_movesteps = motion_movesteps;
+exports.motion_turnleft = motion_turnleft;
+exports.motion_turnright = motion_turnright;
+
 /*
 var homo = PIXI.Sprite.from("test.svg");
 function print(s) {
@@ -103,6 +109,7 @@ const create_sprite = (path) => {var new_sprite = PIXI.Sprite.from(path);};
 const move_sprite = (x, y) => new_sprite.position.set(x, y);
 */
 
+/*
 import { compile } from "walt-compiler";
 var memory = new WebAssembly.Memory({ initial: 1 });
 function walt_log(string) {
@@ -118,3 +125,4 @@ export function echo(): void {
 }`).buffer();
 
 WebAssembly.instantiate(buffer2, { env: { walt_log: walt_log } }).then(result => result.instance.exports.echo());
+*/

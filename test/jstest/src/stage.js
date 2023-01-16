@@ -8,5 +8,4 @@ const sprite = new PIXI.Sprite(textures[0]);
 global.events.on("greenFlag", function() {
     global.app.stage.addChild(sprite);
     sprite.texture = textures[0];
-    sprite.scale.set(0.5);
 });

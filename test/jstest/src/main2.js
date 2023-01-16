@@ -2,7 +2,7 @@ var PIXI = require("pixi.js");
 var EventEmitter = require("events").EventEmitter;
 
 //init app
-global.app = new PIXI.Application({ width: 480, height: 320, backgroundColor: 0xf0ffff });
+global.app = new PIXI.Application({ width: 1440, height: 900, backgroundColor: 0xf0ffff });
 document.body.appendChild(global.app.view);
 global.app.stage.sortableChildren = true;
 

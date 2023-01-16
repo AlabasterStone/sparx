@@ -1,0 +1,38 @@
+<body>
+    <canvas id="scratch-stage" width="10" height="10"></canvas>
+    <script src="./scratch-render.js"></script>
+    <script>
+        const canvas = document.getElementById("scratch-stage");
+        const drawStep = function () {
+            renderer.draw();
+            // renderer.getBounds(drawableID2);
+            // renderer.isTouchingColor(drawableID2, [255,255,255]);
+            requestAnimationFrame(drawStep);
+        };
+        var renderer = new ScratchRender(canvas);
+        renderer.setLayerGroupOrdering(['group1']);
+        var sprite1 = renderer.createDrawable('group1');
+        var img = new Image();
+        img.src = "./794c78eb87530ed31644b9c2caeb226d.png";
+        var costume1;
+        img.onload = function () {
+            costume1 = renderer.createBitmapSkin(img, 2, [97, 126]);
+        };
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', './2daca5f43efc2d29fb089879448142e9.svg');
+        xhr.send();
+        var costume2;
+        xhr.onload = function() {
+            costume2 = renderer.createSVGSkin(xhr.responseText, [49, 63]);
+        };
+        function start() {
+            renderer.updateDrawableSkinId(sprite1, costume1);
+            //renderer.updateDrawableSkinId(sprite1, costume2);
+        }
+        setTimeout(start, 1000);
+        var sprite3 = renderer.createDrawable('group1');
+        var textBubble = renderer.createTextSkin("say", "Hello scratch-render!!!", false);
+        renderer.updateDrawableSkinId(sprite3, textBubble);
+        drawStep();
+    </script>
+</body>
