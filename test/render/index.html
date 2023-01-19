@@ -2,6 +2,7 @@
     <canvas id="scratch-stage" width="10" height="10"></canvas>
     <script src="./scratch-render.js"></script>
     <script>
+        /**
         const canvas = document.getElementById("scratch-stage");
         const drawStep = function () {
             renderer.draw();
@@ -34,5 +35,31 @@
         var textBubble = renderer.createTextSkin("say", "Hello scratch-render!!!", false);
         renderer.updateDrawableSkinId(sprite3, textBubble);
         drawStep();
+        **/
+        var vars = { "test": 0 };
+        var lists = { "test": ["东西", "东西", "东西"] };
+        var broadcasts = { "消息1": new CustomEvent("消息1") };
+
+        var img_背景1 = new Image();
+        img_背景1.src = "./794c78eb87530ed31644b9c2caeb226d.png";
+        var costume_背景1;
+        img_背景1.onload = function () {
+            costume_背景1 = renderer.createBitmapSkin(img_背景1, 2, [97,126]);
+        };
+
+
+        const canvas = document.getElementById("scratch-stage");
+        var renderer = new ScratchRender(canvas);
+        const drawStep = function () {
+            renderer.draw();
+            requestAnimationFrame(drawStep);
+        };
+        renderer.setLayerGroupOrdering(['layer0', 'layer1'])
+        var stage_Stage = renderer.createDrawable('layer0');
+        load = function () {
+            renderer.updateDrawableSkinId(stage_Stage, costume_背景1);
+            drawStep();
+        }
+        setTimeout(load, 1000);
     </script>
 </body>

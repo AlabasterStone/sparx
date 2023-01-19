@@ -1,0 +1,70 @@
+<body>
+    <canvas id="scratch-stage" width="10" height="10"></canvas>
+    <script src="./scratch-render.js"></script>
+    <script>
+        var vars = { "test": 0 };
+        var lists = { "test": ["东西", "东西", "东西"] };
+        var broadcasts = { "消息1": new CustomEvent("消息1") };
+
+        var stage_img1 = new Image();
+        stage_img1.src = "./797b03bdb8cf6ccfc30c0692d533d998.png";
+        var stage_costume1;
+        stage_img1.onload = function () {
+            stage_costume1 = renderer.createBitmapSkin(stage_img1, 2, [480, 360]);
+        };
+
+        const canvas = document.getElementById("scratch-stage");
+        var renderer = new ScratchRender(canvas);
+        const drawStep = function () {
+            renderer.draw();
+            requestAnimationFrame(drawStep);
+        };
+        renderer.setLayerGroupOrdering(['layer0', 'layer1']);
+        var costumes;
+        var stage = renderer.createDrawable('layer0');
+
+
+        var sprite1_img1 = new Image();
+        sprite1_img1.src = "./794c78eb87530ed31644b9c2caeb226d.png";
+        var sprite1_costume1;
+        sprite1_img1.onload = function () {
+            sprite1_costume1 = renderer.createBitmapSkin(sprite1_img1, 2, [97, 126]);
+        };
+
+        var sprite1_xhr2 = new XMLHttpRequest();
+        sprite1_xhr2.open('GET', './365d4de6c99d71f1370f7c5e636728af.svg');
+        sprite1_xhr2.send();
+        var sprite1_costume2;
+        sprite1_xhr2.onload = function () {
+            sprite1_costume2 = renderer.createSVGSkin(sprite1_xhr2.responseText, [49, 64]);
+        };
+
+        var sprite1_xhr3 = new XMLHttpRequest();
+        sprite1_xhr3.open('GET', './2daca5f43efc2d29fb089879448142e9.svg');
+        sprite1_xhr3.send();
+        var sprite1_costume3;
+        sprite1_xhr3.onload = function () {
+            sprite1_costume3 = renderer.createSVGSkin(sprite1_xhr3.responseText, [49, 63]);
+        };
+
+        var sprite1_xhr4 = new XMLHttpRequest();
+        sprite1_xhr4.open('GET', './5456a723f3b35eaa946b974a59888793.svg');
+        sprite1_xhr4.send();
+        var sprite1_costume4;
+        sprite1_xhr4.onload = function () {
+            sprite1_costume4 = renderer.createSVGSkin(sprite1_xhr4.responseText, [49, 63]);
+        };
+        var sprite1 = renderer.createDrawable('layer1');
+        var sprites = { "Tera": sprite1 };
+
+        _load_function = function () {
+            costumes = { "Stage": { "背景1": stage_costume1 }, "Tera": { "tera-a": sprite1_costume1, "tera-b": sprite1_costume2, "tera-c": sprite1_costume3, "tera-d": sprite1_costume4 } };
+            renderer.updateDrawableSkinId(stage, costumes["Stage"]["背景1"]);
+            renderer.updateDrawableSkinId(sprites["Tera"], costumes["Tera"]["tera-d"]);
+            drawStep();
+        };
+
+        setTimeout(_load_function, 1000);
+
+    </script>
+</body>

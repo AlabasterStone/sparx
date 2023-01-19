@@ -4,64 +4,154 @@
 //JITCompiler
 //AOT & JIT Compiler
 
-//Just a template, working in progress, plz waiting for it done.
-
 //import { compile } from "walt-compiler";
 //unused
-import { jsCode } from "./code.js";
+//import { jsCode } from "./code.js";
 import { testData3 } from "./test.js";
 
 var genCode = "";
 
-export function compile() {
+export function compile(obj) {
+    var stage_key;
+    for (let key of Object.keys(obj)) {
+        if (obj[key]["isStage"]) {
+            stage_key = key;
+        }
+    }
     var code = `
 <body>
     <canvas id="scratch-stage" width="10" height="10"></canvas>
     <script src="./scratch-render.js"></script>
     <script>
-        const canvas = document.getElementById("scratch-stage");
-        const drawStep = function () {
-            renderer.draw();
-            requestAnimationFrame(drawStep);
-        };
-        var renderer = new ScratchRender(canvas);
-        renderer.setLayerGroupOrdering(['group1']);
-        var sprite1 = renderer.createDrawable('group1');
-        var img = new Image();
-        img.src = "./794c78eb87530ed31644b9c2caeb226d.png";
-        var costume1;
-        img.onload = function () {
-            costume1 = renderer.createBitmapSkin(img, 2, [97, 126]);
-        };
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', './2daca5f43efc2d29fb089879448142e9.svg');
-        xhr.send();
-        var costume2;
-        xhr.onload = function() {
-            costume2 = renderer.createSVGSkin(xhr.responseText, [49, 63]);
-        };
-        function start() {
-            renderer.updateDrawableSkinId(sprite1, costume1);
-            //renderer.updateDrawableSkinId(sprite1, costume2);
-        }
-        setTimeout(start, 1000);
-        var sprite3 = renderer.createDrawable('group1');
-        var textBubble = renderer.createTextSkin("say", "Hello scratch-render!!!", false);
-        renderer.updateDrawableSkinId(sprite3, textBubble);
-        drawStep();
+        ${generateStage(obj, obj[stage_key], stage_key)}
+        ${generateSprites(obj)}
+        ${genLoadFunction(obj)}
+        ${genTimeout()}
     </script>
-</body>`
+</body>`;
+    return code;
 }
 
-function generateScript() {
-
+function generateScript(blocks) {
+    
 }
 
-function generateSprite() {
-
+function genLoadFunction(obj) {
+    var update_skin = "";
+    var code = "";
+    var costumes_obj = "costumes = {";
+    code += "_load_function = function() {\n";
+    let i = 0;
+    let k = 0;
+    for (let key of Object.keys(obj)) {
+        if (key == "monitors" || key == "extensions") {
+            continue;
+        }
+        else if (obj[key]["isStage"]) {
+            i++;
+            costumes_obj += `"${key}": {`;
+            for (let j = 0; j < obj[key]["costumes"].length; j++) {
+                costumes_obj += `"${obj[key]["costumes"][j]["name"]}": stage_costume${j + 1}`;
+                if (j != obj[key]["costumes"].length - 1) {
+                    costumes_obj += ", ";
+                }
+            }
+            costumes_obj += "}";
+            update_skin += `    renderer.updateDrawableSkinId(stage, costumes["${key}"]["${obj[key]["costumes"][obj[key]["currentCostume"]]["name"]}"]);\n`;
+        }
+        else {
+            k++;
+            i++;
+            costumes_obj += `"${key}": {`;
+            for (let j = 0; j < obj[key]["costumes"].length; j++) {
+                costumes_obj += `"${obj[key]["costumes"][j]["name"]}": sprite${k}_costume${j + 1}`;
+                if (j != obj[key]["costumes"].length - 1) {
+                    costumes_obj += ", ";
+                }
+            }
+            costumes_obj += "}";
+            update_skin += `    renderer.updateDrawableSkinId(sprites["${key}"], costumes["${key}"]["${obj[key]["costumes"][obj[key]["currentCostume"]]["name"]}"]);\n`;
+        }
+        if (i != Object.keys(obj).length - 2) {
+            costumes_obj += ", ";
+        }
+    }
+    costumes_obj += "};\n";
+    code += costumes_obj;
+    code += update_skin;
+    code += "    drawStep();\n";
+    code += "};\n";
+    return code;
 }
 
-function generateStage(stage) {
+function generateSprites(obj) {
+    var list = "var sprites = {";
+    //var costumes_obj = "var costumes = {"
+    var code = "";
+    var i = 0;
+    //var k = 0;
+    for (let key of Object.keys(obj)) {
+        if (obj[key]["isStage"] || key == "monitors" || key == "extensions") {
+            /*
+            if (obj[key]["isStage"]) {
+                k++;
+                costumes_obj += `"${key}": {`;
+                for (let j = 0; j < obj[key]["costumes"].length; j++) {
+                    costumes_obj += `"${obj[key]["costumes"][j]["name"]}": stage_costume${j + 1}`;
+                    if (j != obj[key]["costumes"].length - 1) {
+                        costumes_obj += ", ";
+                    }
+                }
+                costumes_obj += "}";
+            }
+            */
+           continue;
+        }
+        else {
+            i++;
+            //k++;
+            code += generateSprite(obj[key], key, i);
+            list += `"${key}": sprite${i}`;
+            /*
+            costumes_obj += `"${key}": {`;
+            for (let j = 0; j < obj[key]["costumes"].length; j++) {
+                costumes_obj += `"${obj[key]["costumes"][j]["name"]}": sprite${i}_costume${j + 1}`;
+                if (j != obj[key]["costumes"].length - 1) {
+                    costumes_obj += ", ";
+                }
+            }
+            costumes_obj += "}";
+            */
+            if (i != Object.keys(obj).length - 3) {
+                list += ", ";
+            }
+        }
+        /*
+        if (k != Object.keys(obj).length - 2) {
+            costumes_obj += ", ";
+        }
+        */
+    }
+    //costumes_obj += "};";
+    list += "};";
+    code += list + "\n";
+    //code += costumes_obj + "\n";
+    return code;
+}
+
+function generateSprite(sprite, name, index) {
+    var code = "";
+    let i = 0;
+    for (let costume of sprite["costumes"]) {
+        i++;
+        code += genCostume(`sprite${index}`, i, costume["md5ext"], costume["bitmapResolution"], costume["rotationCenterX"], costume["rotationCenterY"], costume["dataFormat"], costume["name"]);
+    }
+    code += genSprite(name, index);
+    //code += genLoadSprite(sprite["costumes"], sprite["currentCostume"], name);
+    return code;
+}
+
+function generateStage(obj, stage, name) {
     var code = "";
     let i = 0;
     let list = {};
@@ -87,19 +177,23 @@ function generateStage(stage) {
     list += "};";
     code += list + "\n";
     list = "";
-    list += "var costumes = {";
     i = 0;
     for (let costume of stage["costumes"]) {
         i++;
-        code += genCostume("stage", i, costume["md5ext"], costume["bitmapResolution"], costume["rotationCenterX"], costume["rotationCenterY"], costume["dataFormat"]);
-        list += `"${costume["name"]}": stage_costume${i}`;
+        code += genCostume("stage", i, costume["md5ext"], costume["bitmapResolution"], costume["rotationCenterX"], costume["rotationCenterY"], costume["dataFormat"], costume["name"]);
+        /*
+        list += `"${costume["name"]}": costume_${costume["name"]}`;
         if (i != stage["costumes"].length) {
             list += ", ";
         }
+        */
     }
-    list += "};";
-    code += list + "\n";
-    code += genRenderer();
+    //list += "};";
+    //var name = Object.keys(obj)[Object.values(obj).indexOf(stage)];
+    code += genRenderer(obj);
+    code += genStage(name);
+    //code += genLoad(stage["costumes"], stage["currentCostume"], name);
+    //code += genTimeout();
     return code;
 }
 
@@ -122,49 +216,45 @@ function genList(sprite, obj) {
     return `var lists = ${JSON.stringify(obj)};\n`;
 }
 
-/**
- * 
- * @param {string} sprite 
- * @param {string} name 
- * @returns {string}
- */
-function genBroadcast(sprite, name) {
-    return `new CustomEvent("${name}");\n`;
-}
-
-/**
- * 
- * @param {string} sprite 
- * @param {object} list 
- * @returns {string}
- */
-function genBroadcastsList(sprite, list) {
-    return `var broadcasts = ${JSON.stringify(list)};\n`;
-}
-
-function genRenderer() {
+function genRenderer(targets) {
+    let code = "";
+    code += "[";
+    for (let i = 0; i < Object.keys(targets).length - 2; i++) {
+        code += `'layer${i}'`;
+        if (i != Object.keys(targets).length - 3) {
+            code += ", ";
+        }
+    }
+    code += "]";
     return `
 const canvas = document.getElementById("scratch-stage");
 var renderer = new ScratchRender(canvas);
 const drawStep = function () {
     renderer.draw();
     requestAnimationFrame(drawStep);
-};\n`;
+};
+renderer.setLayerGroupOrdering(${code});
+var costumes;\n`;
 }
 
 /**
  * @todo
- * @param {} index 
+ * @param {string} name
+ * @param {number} index 
  * @returns 
  */
-function genSprite(index) {
+function genSprite(name, index) {
     return `var sprite${index} = renderer.createDrawable('layer${index}');\n`;
+}
+
+function genStage(name) {
+    return `var stage = renderer.createDrawable('layer0');\n`;
 }
 
 /**
  * 
- * @param {string} sprite e.g.: stage / sprite1 / sprite2
- * @param {number} index 
+ * @param {string} sprite !deprecated
+ * @param {number} index !deprecated
  * @param {string} name 
  * @param {string} asset 
  * @param {number} bitmapRsl 
@@ -172,30 +262,53 @@ function genSprite(index) {
  * @param {number} rcy 
  * @param {string} dataFmt 
  */
-function genCostume(sprite, index, asset, bitmapRsl, rcx, rcy, dataFmt) {
-    if(dataFmt == "svg") {
+function genCostume(sprite, index, asset, bitmapRsl, rcx, rcy, dataFmt, name) {
+    if (dataFmt == "svg") {
         return `        
-var xhr = new XMLHttpRequest();
-xhr.open('GET', './${asset}');
-xhr.send();
+var ${sprite}_xhr${index} = new XMLHttpRequest();
+${sprite}_xhr${index}.open('GET', './${asset}');
+${sprite}_xhr${index}.send();
 var ${sprite}_costume${index};
-xhr.onload = function() {
-    ${sprite}_costume${index} = renderer.createSVGSkin(xhr.responseText, [${rcx}, ${rcy}]);
+${sprite}_xhr${index}.onload = function() {
+    ${sprite}_costume${index} = renderer.createSVGSkin(${sprite}_xhr${index}.responseText, [${rcx}, ${rcy}]);
 };\n`
     }
-    else if(dataFmt == "png") {
+    else if (dataFmt == "png") {
         return `        
-var img = new Image();
-img.src = "./${asset}";
+var ${sprite}_img${index} = new Image();
+${sprite}_img${index}.src = "./${asset}";
 var ${sprite}_costume${index};
-img.onload = function () {
-    ${sprite}_costume${index} = renderer.createBitmapSkin(img, ${bitmapRsl}, [${rcx}, ${rcy}]);
+${sprite}_img${index}.onload = function () {
+    ${sprite}_costume${index} = renderer.createBitmapSkin(${sprite}_img${index}, ${bitmapRsl}, [${rcx}, ${rcy}]);
 };\n`
     }
 }
 
+function genTimeout() {
+    return `setTimeout(_load_function, 1000);\n`;
+}
+
+function genBlock(block) {
+    let opcode = block["opcode"];
+    let args = block["args"];
+    switch (opcode) {
+        case "event_whenflagclicked":
+            return `window.addEventListener("greenFlag", function() {\n`;
+        case "event_whenkeypressed":
+            return `document.onkeypress = function (e) {\n`;
+        case "event_whenstageclicked":
+        /**@todo setInterval */
+        case "event_whenthisspriteclicked":
+        /** right above */
+        case "event_whenbackdropswitchesto":
+        /**@todo */
+        case "event_whenbroadcastreceived":
+    }
+}
+
 function Tests() {
-    console.log(generateStage(testData3.Stage));
+    //console.log(generateStage(testData3, testData3.Stage));
+    console.log(compile(testData3));
 }
 
 Tests();
